@@ -3,9 +3,12 @@ import pymongo
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
 from authlib.integrations.flask_client import OAuth
+from dotenv import dotenv_values
+
+config = dotenv_values(".env")
 
 mongo = PyMongo()
-client = pymongo.MongoClient("mongodb+srv://dcete:1234@testcluster.asy2c.mongodb.net/<dbname>?retryWrites=true&w=majority")
+client = pymongo.MongoClient(config.MONGO_URL)
 db = client["users"]
 collection = db["user"]
 
@@ -15,8 +18,8 @@ app.secret_key = 'thisissupposedtobearandomkeybutimtoolazytocomeupwithonesoherey
 oauth = OAuth(app)
 google = oauth.register(
     name="google",
-    client_id='635013033644-m74vbqr24h2i2ardqqha3mtci51emvj1.apps.googleusercontent.com',
-    client_secret='dshuXqnI68oG63uxnpA-Qzau',
+    client_id=config.GOOGLE_CLIENT_ID,
+    client_secret=config.GOOGLE_SECRET
     access_token_url='https://accounts.google.com/o/oauth2/token',
     access_token_params=None,
     authorize_url='https://accounts.google.com/o/oauth2/auth',
