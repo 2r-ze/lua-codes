@@ -8,7 +8,7 @@ from dotenv import dotenv_values
 config = dotenv_values(".env")
 
 mongo = PyMongo()
-client = pymongo.MongoClient(config.MONGO_URL)
+client = pymongo.MongoClient(config["MONGO_URL"])
 db = client["users"]
 collection = db["user"]
 
@@ -18,8 +18,8 @@ app.secret_key = 'thisissupposedtobearandomkeybutimtoolazytocomeupwithonesoherey
 oauth = OAuth(app)
 google = oauth.register(
     name="google",
-    client_id=config.GOOGLE_CLIENT_ID,
-    client_secret=config.GOOGLE_SECRET
+    client_id=config["GOOGLE_CLIENT_ID"],
+    client_secret=config["GOOGLE_SECRET"],
     access_token_url='https://accounts.google.com/o/oauth2/token',
     access_token_params=None,
     authorize_url='https://accounts.google.com/o/oauth2/auth',
@@ -52,13 +52,17 @@ def home():
     email = profile['email']
     userid = profile['id']
 
-    # query to MongoDB
+    # query to MongoDB collection
     collection.insert_one({
         "id": userid,
-        "email": email
+        "email": email,
+        "progress": 0
     })
 
     return f"Hello, {email}\n" + f"ID: {userid}"
+
+# @app.route('/progress')
+# def progress():
 
 
     
