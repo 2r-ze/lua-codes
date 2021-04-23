@@ -44,53 +44,37 @@ def authorize():
     token = google.authorize_access_token()
     resp = google.get('userinfo')   
     session['profile'] = resp.json()
+
+    # query to MongoDB collection
+    users = collection.find()
+    userExists = False
+    profile = session['profile']
+    for user in users:
+        if user['id'] == profile['id'] and user['email'] == profile['email']:
+            userExists = True
+    if not userExists:
+        collection.insert_one({"id": profile['id'], "email": profile['email'],"progress": 0})
+
     return redirect('/home')
 
 @app.route('/home')
 def home(): 
-    profile = dict(session)['profile']
+    profile = session['profile']
     email = profile['email']
     userid = profile['id']
 
-    # query to MongoDB collection
-    collection.insert_one({
-        "id": userid,
-        "email": email,
-        "progress": 0
-    })
-
     return f"Hello, {email}\n" + f"ID: {userid}"
 
-# @app.route('/progress')
-# def progress():
-
+@app.route('/progress')
+def progress():
+    profile = session['profile']
+    collection.update_one(
+        {"id": profile['id']},
+        {"$inc": {"progress": 1}}
+    )
+    return redirect('/home')
 
     
 if __name__ == '__main__':
     app.run()
 
-
-
-
-
-
-
-
-
-
-
-# @app.route('/adduser')
-# def usertest():
-#     collection.insert_one({"name": "anefa"})
-#     return "hello"
-
-# @app.route('/finduser')
-# def finduser():
-#     print(collection.find_one({"name": "devin"}))
-#     return "lol"
-
-# @app.route('/deleteuser')
-# def deleteuser():
-#     collection.find_one_and_delete({"name": "devin"})
-#     print(collection.find({}))
-#     return "lol2"
